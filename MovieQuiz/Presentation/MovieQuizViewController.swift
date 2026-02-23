@@ -2,11 +2,16 @@ import UIKit
 
 final class MovieQuizViewController: UIViewController {
     
+    // MARK: - IBOutlets
+    
     @IBOutlet private weak var questionTitleLabel: UILabel!
+    @IBOutlet private weak var questionIndexLabel: UILabel!
     @IBOutlet private weak var posterImageView: UIImageView!
     @IBOutlet private weak var questionLabel: UILabel!
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
+    
+    // MARK: - Properties
     
     private struct QuizQuestion {
         let image: String
@@ -30,11 +35,14 @@ final class MovieQuizViewController: UIViewController {
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
         showCurrentQuestion()
     }
+    
+    // MARK: - Actions
     
     @IBAction private func yesButtonTapped(_ sender: UIButton) {
         checkAnswer(true)
@@ -44,35 +52,14 @@ final class MovieQuizViewController: UIViewController {
         checkAnswer(false)
     }
     
-    private func setupUI() {
-        view.backgroundColor = UIColor(white: 0.15, alpha: 1)
-        
-        posterImageView.layer.cornerRadius = 20
-        posterImageView.clipsToBounds = true
-        posterImageView.contentMode = .scaleAspectFill
-        
-        questionTitleLabel.textColor = .white
-        questionTitleLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        
-        questionLabel.textColor = .white
-        questionLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        questionLabel.numberOfLines = 0
-        questionLabel.textAlignment = .center
-        
-        for button in [noButton, yesButton] {
-            button?.backgroundColor = .white
-            button?.setTitleColor(.black, for: .normal)
-            button?.layer.cornerRadius = 18
-            button?.layer.borderWidth = 0
-            button?.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .medium)
-        }
-    }
+    // MARK: - Private Methods
     
     private func showCurrentQuestion() {
         let question = questions[currentQuestionIndex]
         posterImageView.image = UIImage(named: question.image)
         questionLabel.text = question.text
-        questionTitleLabel.text = "Вопрос: \(currentQuestionIndex + 1)/\(questions.count)"
+        questionTitleLabel.text = "Вопрос:"
+        questionIndexLabel.text = "\(currentQuestionIndex + 1)/\(questions.count)"
         posterImageView.layer.borderWidth = 0
         posterImageView.layer.borderColor = UIColor.clear.cgColor
     }
@@ -88,7 +75,9 @@ final class MovieQuizViewController: UIViewController {
         view.isUserInteractionEnabled = false
         
         posterImageView.layer.borderWidth = 8
-        posterImageView.layer.borderColor = isCorrect ? UIColor.green.cgColor : UIColor.red.cgColor
+        posterImageView.layer.borderColor = isCorrect
+            ? UIColor(named: "YPGreen")?.cgColor
+            : UIColor(named: "YPRed")?.cgColor
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.view.isUserInteractionEnabled = true
@@ -118,4 +107,4 @@ final class MovieQuizViewController: UIViewController {
         })
         present(alert, animated: true)
     }
-}
+}		
