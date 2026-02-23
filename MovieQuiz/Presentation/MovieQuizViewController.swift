@@ -39,6 +39,7 @@ final class MovieQuizViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
         showCurrentQuestion()
     }
     
@@ -53,6 +54,17 @@ final class MovieQuizViewController: UIViewController {
     }
     
     // MARK: - Private Methods
+    
+    private func setupUI() {
+        posterImageView.layer.cornerRadius = 20
+        posterImageView.clipsToBounds = true
+        posterImageView.contentMode = .scaleAspectFill
+        
+        for button in [noButton, yesButton] {
+            button?.layer.cornerRadius = 15
+            button?.clipsToBounds = true
+        }
+    }
     
     private func showCurrentQuestion() {
         let question = questions[currentQuestionIndex]
@@ -107,4 +119,4 @@ final class MovieQuizViewController: UIViewController {
         })
         present(alert, animated: true)
     }
-}		
+}
