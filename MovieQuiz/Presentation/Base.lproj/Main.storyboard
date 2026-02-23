@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="24506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_1" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="24504"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
+    <customFonts key="customFonts">
+        <array key="YS Display-Bold.ttf">
+            <string>YSDisplay-Bold</string>
+        </array>
+        <array key="YS Display-Medium.ttf">
+            <string>YSDisplay-Medium</string>
+        </array>
+    </customFonts>
     <scenes>
         <!--Movie Quiz View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -15,13 +24,106 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Вопрос:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="chs-wQ-6eb">
+                                <rect key="frame" x="20" y="106" width="72" height="24"/>
+                                <fontDescription key="fontDescription" name="YSDisplay-Medium" family="YS Display" pointSize="20"/>
+                                <color key="textColor" name="YPWhite"/>
+                                <color key="highlightedColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </label>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Deadpool" translatesAutoresizingMaskIntoConstraints="NO" id="Ylw-yW-w1Z">
+                                <rect key="frame" x="20" y="150" width="374" height="472"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Рейтинг этого фильма больше чем 7?" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mo7-bd-cvU">
+                                <rect key="frame" x="62" y="655" width="290" height="60"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="FRT-2T-kX5"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="YSDisplay-Bold" family="YS Display" pointSize="23"/>
+                                <color key="textColor" name="YPWhite"/>
+                                <color key="highlightedColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="OBx-vu-2FC">
+                                <rect key="frame" x="20" y="748" width="177" height="60"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="6lz-c5-dxp"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Нет">
+                                    <fontDescription key="titleFontDescription" name="YSDisplay-Medium" family="YS Display" pointSize="20"/>
+                                    <color key="baseForegroundColor" name="YPBlack"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="noButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="cip-sr-AEk"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="3/10" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Luu-jg-tse">
+                                <rect key="frame" x="356" y="106" width="38" height="24"/>
+                                <fontDescription key="fontDescription" name="YSDisplay-Medium" family="YS Display" pointSize="20"/>
+                                <color key="textColor" name="YPWhite"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fua-zF-HQc">
+                                <rect key="frame" x="217" y="748" width="177" height="60"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="60" id="vDW-29-1sg"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Да">
+                                    <fontDescription key="titleFontDescription" name="YSDisplay-Medium" family="YS Display" pointSize="20"/>
+                                    <color key="baseForegroundColor" name="YPBlack"/>
+                                </buttonConfiguration>
+                                <connections>
+                                    <action selector="yesButtonTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yT2-Qb-0Za"/>
+                                </connections>
+                            </button>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="backgroundColor" name="YPBlack"/>
+                        <constraints>
+                            <constraint firstItem="chs-wQ-6eb" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="0pR-zC-Be5"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="fua-zF-HQc" secondAttribute="bottom" constant="20" id="1lH-nb-ffh"/>
+                            <constraint firstItem="Luu-jg-tse" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="10" id="72S-Y2-Ta9"/>
+                            <constraint firstItem="mo7-bd-cvU" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="62" id="CWt-b7-Ay0"/>
+                            <constraint firstAttribute="trailing" secondItem="Luu-jg-tse" secondAttribute="trailing" constant="20" id="HlM-km-LBa"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="fua-zF-HQc" secondAttribute="trailing" constant="20" id="M7Z-de-iXi"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="OBx-vu-2FC" secondAttribute="bottom" constant="20" id="MK7-Bc-VNE"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="mo7-bd-cvU" secondAttribute="trailing" constant="62" id="RXt-vD-JxL"/>
+                            <constraint firstItem="fua-zF-HQc" firstAttribute="width" secondItem="OBx-vu-2FC" secondAttribute="width" id="SBH-Cx-vGA"/>
+                            <constraint firstItem="OBx-vu-2FC" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="SXO-BX-jPd"/>
+                            <constraint firstItem="Ylw-yW-w1Z" firstAttribute="top" secondItem="chs-wQ-6eb" secondAttribute="bottom" constant="20" id="XVL-Xv-s7X"/>
+                            <constraint firstItem="mo7-bd-cvU" firstAttribute="top" secondItem="Ylw-yW-w1Z" secondAttribute="bottom" constant="33" id="aPB-MI-yya"/>
+                            <constraint firstItem="OBx-vu-2FC" firstAttribute="top" secondItem="mo7-bd-cvU" secondAttribute="bottom" constant="33" id="be1-fY-2i2"/>
+                            <constraint firstItem="Ylw-yW-w1Z" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="csI-fY-pno"/>
+                            <constraint firstItem="fua-zF-HQc" firstAttribute="leading" secondItem="OBx-vu-2FC" secondAttribute="trailing" constant="20" id="iK6-v7-2ql"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Ylw-yW-w1Z" secondAttribute="trailing" constant="20" id="qdg-Rr-5VO"/>
+                            <constraint firstItem="chs-wQ-6eb" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="vex-e6-grv"/>
+                            <constraint firstItem="Ylw-yW-w1Z" firstAttribute="top" secondItem="Luu-jg-tse" secondAttribute="bottom" constant="20" id="zcf-WS-7OU"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="noButton" destination="OBx-vu-2FC" id="z0V-cI-0kW"/>
+                        <outlet property="posterImageView" destination="Ylw-yW-w1Z" id="XQu-ce-C0g"/>
+                        <outlet property="questionIndexLabel" destination="Luu-jg-tse" id="lT9-To-kGf"/>
+                        <outlet property="questionLabel" destination="mo7-bd-cvU" id="LaT-Id-aSq"/>
+                        <outlet property="questionTitleLabel" destination="chs-wQ-6eb" id="kUY-JY-sjB"/>
+                        <outlet property="yesButton" destination="fua-zF-HQc" id="sfA-nn-5Ln"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-55.072463768115945" y="55.580357142857139"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Deadpool" width="2000" height="3000"/>
+        <namedColor name="YPBlack">
+            <color red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="YPWhite">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
 </document>
