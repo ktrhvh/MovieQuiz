@@ -7,6 +7,11 @@ struct QuizQuestion {
 }
 
 final class QuestionFactory {
+    
+    // MARK: - Properties
+    
+    var count: Int { questions.count }
+    
     private let questions: [QuizQuestion] = [
         QuizQuestion(image: "The Godfather", text: "Рейтинг этого фильма больше чем 9?", correctAnswer: true),
         QuizQuestion(image: "The Dark Knight", text: "Рейтинг этого фильма больше чем 8?", correctAnswer: true),
@@ -20,10 +25,10 @@ final class QuestionFactory {
         QuizQuestion(image: "Vivarium", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false)
     ]
     
+    // MARK: - Methods
+    
     func question(at index: Int) -> QuizQuestion? {
         guard index >= 0 && index < questions.count else { return nil }
         return questions[index]
     }
-    
-    var count: Int { questions.count }
 }

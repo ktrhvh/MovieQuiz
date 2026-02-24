@@ -2,16 +2,7 @@ import Foundation
 
 final class StatisticService: StatisticServiceProtocol {
     
-    private let userDefaults = UserDefaults.standard
-    
-    private enum Keys {
-        static let gamesCount = "gamesCount"
-        static let bestCorrect = "bestCorrect"
-        static let bestTotal = "bestTotal"
-        static let bestDate = "bestDate"
-        static let totalCorrect = "totalCorrect"
-        static let totalQuestions = "totalQuestions"
-    }
+    // MARK: - Properties
     
     var gamesCount: Int {
         get { userDefaults.integer(forKey: Keys.gamesCount) }
@@ -36,8 +27,24 @@ final class StatisticService: StatisticServiceProtocol {
         let correct = userDefaults.integer(forKey: Keys.totalCorrect)
         let total = userDefaults.integer(forKey: Keys.totalQuestions)
         guard total > 0 else { return 0 }
-        return Double(correct) / Double(total) * 100
+        return Double(correct) / Double(total) * percentMultiplier
     }
+    
+    // MARK: - Private Properties
+    
+    private let userDefaults = UserDefaults.standard
+    private let percentMultiplier: Double = 100
+    
+    private enum Keys {
+        static let gamesCount = "gamesCount"
+        static let bestCorrect = "bestCorrect"
+        static let bestTotal = "bestTotal"
+        static let bestDate = "bestDate"
+        static let totalCorrect = "totalCorrect"
+        static let totalQuestions = "totalQuestions"
+    }
+    
+    // MARK: - Methods
     
     func store(correct: Int, total: Int) {
         gamesCount += 1

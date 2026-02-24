@@ -20,18 +20,26 @@ final class MovieQuizViewController: UIViewController {
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
     
+    private let borderWidth: CGFloat = 8
+    private let cornerRadius: CGFloat = 20
+    private let answerDelay: Double = 1.0
+    private let dateFormat = "dd.MM.yyyy HH:mm"
+    private let questionTitle = "Вопрос:"
+    private let alertTitle = "Этот раунд окончен!"
+    private let alertButtonText = "Сыграть ещё раз"
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
-        super.viewDidLoad()	
-        posterImageView.layer.cornerRadius = 20
+        super.viewDidLoad()
+        posterImageView.layer.cornerRadius = cornerRadius
         alertPresenter = ResultAlertPresenter(viewController: self)
         showCurrentQuestion()
     }
     
     // MARK: - Actions
     
-    @IBAction private func yesButtonTapped(_ sender: UIButton) {
+    @IBAction private func yesButtonTapped(_ sender: UIButto		n) {
         checkAnswer(true)
     }
     
@@ -45,7 +53,7 @@ final class MovieQuizViewController: UIViewController {
         guard let question = questionFactory.question(at: currentQuestionIndex) else { return }
         posterImageView.image = UIImage(named: question.image)
         questionLabel.text = question.text
-        questionTitleLabel.text = "Вопрос:"
+        questionTitleLabel.text = questionTitle
         questionIndexLabel.text = "\(currentQuestionIndex + 1)/\(questionFactory.count)"
         posterImageView.layer.borderWidth = 0
         posterImageView.layer.borderColor = UIColor.clear.cgColor
@@ -61,18 +69,18 @@ final class MovieQuizViewController: UIViewController {
         if isCorrect { correctAnswers += 1 }
         
         view.isUserInteractionEnabled = false
-        posterImageView.layer.borderWidth = 8
+        posterImageView.layer.borderWidth = borderWidth
         posterImageView.layer.borderColor = isCorrect
             ? UIColor(named: "YPGreen")?.cgColor
             : UIColor(named: "YPRed")?.cgColor
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + answerDelay) { [weak self] in
             guard let self else { return }
             self.view.isUserInteractionEnabled = true
             self.showNextQuestionOrResults()
         }
     }
-    		
+    
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionFactory.count - 1 {
             showResults()
@@ -86,7 +94,7 @@ final class MovieQuizViewController: UIViewController {
         statisticService.store(correct: correctAnswers, total: questionFactory.count)
         
         let formatter = DateFormatter()
-        formatter.dateFormat = "dd.MM.yyyy HH:mm"
+        formatter.dateFormat = dateFormat
         let bestDate = formatter.string(from: statisticService.bestGame.date)
         
         let message = """
@@ -97,9 +105,9 @@ final class MovieQuizViewController: UIViewController {
         """
         
         let model = AlertModel(
-            title: "Этот раунд окончен!",
+            title: alertTitle,
             message: message,
-            buttonText: "Сыграть ещё раз"
+            buttonText: alertButtonText
         ) { [weak self] in
             guard let self else { return }
             self.currentQuestionIndex = 0
@@ -109,4 +117,4 @@ final class MovieQuizViewController: UIViewController {
         
         alertPresenter?.show(model: model)
     }
-}	
+}
