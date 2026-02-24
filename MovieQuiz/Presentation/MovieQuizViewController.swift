@@ -13,39 +13,33 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Properties
     
-    private struct QuizQuestion {
-        let image: String
-        let text: String
-        let correctAnswer: Bool
-    }
-    
-    private let questions: [QuizQuestion] = [
-        QuizQuestion(image: "The Godfather", text: "Рейтинг этого фильма больше чем 9?", correctAnswer: true),
-        QuizQuestion(image: "The Dark Knight", text: "Рейтинг этого фильма больше чем 8?", correctAnswer: true),
-        QuizQuestion(image: "Kill Bill", text: "Рейтинг этого фильма больше чем 8?", correctAnswer: false),
-        QuizQuestion(image: "The Avengers", text: "Рейтинг этого фильма больше чем 8?", correctAnswer: false),
-        QuizQuestion(image: "Deadpool", text: "Рейтинг этого фильма больше чем 7?", correctAnswer: true),
-        QuizQuestion(image: "The Green Knight", text: "Рейтинг этого фильма больше чем 7?", correctAnswer: false),
-        QuizQuestion(image: "Old", text: "Рейтинг этого фильма меньше чем 6?", correctAnswer: true),
-        QuizQuestion(image: "The Ice Age Adventures of Buck Wild", text: "Рейтинг этого фильма меньше чем 5?", correctAnswer: true),
-        QuizQuestion(image: "Tesla", text: "Рейтинг этого фильма больше чем 5?", correctAnswer: false),
-        QuizQuestion(image: "Vivarium", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false)
-    ]
+    private let questionFactory = QuestionFactory()
+    private var statisticService: StatisticServiceProtocol = StatisticService()
+    private var alertPresenter: ResultAlertPresenter?
     
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
+    
+    private let borderWidth: CGFloat = 8
+    private let cornerRadius: CGFloat = 20
+    private let answerDelay: Double = 1.0
+    private let dateFormat = "dd.MM.yyyy HH:mm"
+    private let questionTitle = "Вопрос:"
+    private let alertTitle = "Этот раунд окончен!"
+    private let alertButtonText = "Сыграть ещё раз"
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
+        posterImageView.layer.cornerRadius = cornerRadius
+        alertPresenter = ResultAlertPresenter(viewController: self)
         showCurrentQuestion()
     }
     
     // MARK: - Actions
     
-    @IBAction private func yesButtonTapped(_ sender: UIButton) {
+    @IBAction private func yesButtonTapped(_ sender: UIButto		n) {
         checkAnswer(true)
     }
     
@@ -55,29 +49,19 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Private Methods
     
-    private func setupUI() {
-        posterImageView.layer.cornerRadius = 20
-        posterImageView.clipsToBounds = true
-        posterImageView.contentMode = .scaleAspectFill
-        
-        for button in [noButton, yesButton] {
-            button?.layer.cornerRadius = 15
-            button?.clipsToBounds = true
-        }
-    }
-    
     private func showCurrentQuestion() {
-        let question = questions[currentQuestionIndex]
+        guard let question = questionFactory.question(at: currentQuestionIndex) else { return }
         posterImageView.image = UIImage(named: question.image)
         questionLabel.text = question.text
-        questionTitleLabel.text = "Вопрос:"
-        questionIndexLabel.text = "\(currentQuestionIndex + 1)/\(questions.count)"
+        questionTitleLabel.text = questionTitle
+        questionIndexLabel.text = "\(currentQuestionIndex + 1)/\(questionFactory.count)"
         posterImageView.layer.borderWidth = 0
         posterImageView.layer.borderColor = UIColor.clear.cgColor
     }
     
     private func checkAnswer(_ answer: Bool) {
-        let isCorrect = answer == questions[currentQuestionIndex].correctAnswer
+        guard let question = questionFactory.question(at: currentQuestionIndex) else { return }
+        let isCorrect = answer == question.correctAnswer
         showAnswerResult(isCorrect)
     }
     
@@ -85,20 +69,20 @@ final class MovieQuizViewController: UIViewController {
         if isCorrect { correctAnswers += 1 }
         
         view.isUserInteractionEnabled = false
-        
-        posterImageView.layer.borderWidth = 8
+        posterImageView.layer.borderWidth = borderWidth
         posterImageView.layer.borderColor = isCorrect
             ? UIColor(named: "YPGreen")?.cgColor
             : UIColor(named: "YPRed")?.cgColor
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + answerDelay) { [weak self] in
+            guard let self else { return }
             self.view.isUserInteractionEnabled = true
             self.showNextQuestionOrResults()
         }
     }
     
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questions.count - 1 {
+        if currentQuestionIndex == questionFactory.count - 1 {
             showResults()
         } else {
             currentQuestionIndex += 1
@@ -107,16 +91,30 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showResults() {
-        let alert = UIAlertController(
-            title: "Раунд окончен!",
-            message: "Ваш результат: \(correctAnswers)/\(questions.count)",
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "Сыграть ещё раз", style: .default) { _ in
+        statisticService.store(correct: correctAnswers, total: questionFactory.count)
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = dateFormat
+        let bestDate = formatter.string(from: statisticService.bestGame.date)
+        
+        let message = """
+        Ваш результат: \(correctAnswers)/\(questionFactory.count)
+        Количество сыгранных квизов: \(statisticService.gamesCount)
+        Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(bestDate))
+        Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+        """
+        
+        let model = AlertModel(
+            title: alertTitle,
+            message: message,
+            buttonText: alertButtonText
+        ) { [weak self] in
+            guard let self else { return }
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
             self.showCurrentQuestion()
-        })
-        present(alert, animated: true)
+        }
+        
+        alertPresenter?.show(model: model)
     }
 }
