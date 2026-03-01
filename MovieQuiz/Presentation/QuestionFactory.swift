@@ -1,7 +1,13 @@
 import Foundation
 
+protocol QuestionFactoryDelegate: AnyObject {
+    func didReceiveNextQuestion(question: QuizQuestion?)
+    func didLoadDataFromServer()
+    func didFailToLoadData(with error: Error)
+}
+
 struct QuizQuestion {
-    let image: String
+    let image: Data
     let text: String
     let correctAnswer: Bool
 }
@@ -10,25 +16,74 @@ final class QuestionFactory {
     
     // MARK: - Properties
     
-    var count: Int { questions.count }
+    weak var delegate: QuestionFactoryDelegate?
     
-    private let questions: [QuizQuestion] = [
-        QuizQuestion(image: "The Godfather", text: "Рейтинг этого фильма больше чем 9?", correctAnswer: true),
-        QuizQuestion(image: "The Dark Knight", text: "Рейтинг этого фильма больше чем 8?", correctAnswer: true),
-        QuizQuestion(image: "Kill Bill", text: "Рейтинг этого фильма больше чем 8?", correctAnswer: false),
-        QuizQuestion(image: "The Avengers", text: "Рейтинг этого фильма больше чем 8?", correctAnswer: false),
-        QuizQuestion(image: "Deadpool", text: "Рейтинг этого фильма больше чем 7?", correctAnswer: true),
-        QuizQuestion(image: "The Green Knight", text: "Рейтинг этого фильма больше чем 7?", correctAnswer: false),
-        QuizQuestion(image: "Old", text: "Рейтинг этого фильма меньше чем 6?", correctAnswer: true),
-        QuizQuestion(image: "The Ice Age Adventures of Buck Wild", text: "Рейтинг этого фильма меньше чем 5?", correctAnswer: true),
-        QuizQuestion(image: "Tesla", text: "Рейтинг этого фильма больше чем 5?", correctAnswer: false),
-        QuizQuestion(image: "Vivarium", text: "Рейтинг этого фильма больше чем 6?", correctAnswer: false)
-    ]
+    private let moviesLoader: MoviesLoading
+    private var movies: [MostPopularMovie] = []
+    
+    private enum Constants {
+        static let questionsCount = 10
+        static let ratingThreshold = 7.0
+    }
+    
+    // MARK: - Init
+    
+    init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
+        self.moviesLoader = moviesLoader
+        self.delegate = delegate
+    }
     
     // MARK: - Methods
     
-    func question(at index: Int) -> QuizQuestion? {
-        guard index >= 0 && index < questions.count else { return nil }
-        return questions[index]
+    func loadData() {
+        moviesLoader.loadMovies { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                switch result {
+                case .success(let mostPopularMovies):
+                    self.movies = mostPopularMovies.items
+                    self.delegate?.didLoadDataFromServer()
+                case .failure(let error):
+                    self.delegate?.didFailToLoadData(with: error)
+                }
+            }
+        }
+    }
+    
+    func requestNextQuestion() {
+        DispatchQueue.global().async { [weak self] in
+            guard let self else { return }
+            let index = (0..<self.movies.count).randomElement() ?? 0
+            guard let movie = self.movies[safe: index] else { return }
+            
+            var imageData = Data()
+            do {
+                imageData = try Data(contentsOf: movie.imageURL)
+            } catch {
+                print("Failed to load image")
+            }
+            
+            let rating = Float(movie.rating) ?? 0
+            let threshold = Float(Int.random(in: 6...8))
+            let isMoreThan = Bool.random()
+            
+            let text = isMoreThan
+            ? "Рейтинг этого фильма больше чем \(Int(threshold))?"
+            : "Рейтинг этого фильма меньше чем \(Int(threshold))?"
+            
+            let correctAnswer = isMoreThan
+            ? rating > threshold
+            : rating < threshold
+            
+            let question = QuizQuestion(
+                image: imageData,
+                text: text,
+                correctAnswer: correctAnswer
+            )
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.delegate?.didReceiveNextQuestion(question: question)
+            }
+        }
     }
 }
