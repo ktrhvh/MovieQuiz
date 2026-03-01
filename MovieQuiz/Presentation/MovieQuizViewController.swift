@@ -10,15 +10,17 @@ final class MovieQuizViewController: UIViewController {
     @IBOutlet private weak var questionLabel: UILabel!
     @IBOutlet private weak var noButton: UIButton!
     @IBOutlet private weak var yesButton: UIButton!
+    @IBOutlet private weak var activityIndicator: UIActivityIndicatorView!
     
     // MARK: - Properties
     
-    private let questionFactory = QuestionFactory()
+    private var questionFactory: QuestionFactory?
     private var statisticService: StatisticServiceProtocol = StatisticService()
     private var alertPresenter: ResultAlertPresenter?
     
     private var currentQuestionIndex = 0
     private var correctAnswers = 0
+    private var currentQuestion: QuizQuestion?
     
     private let borderWidth: CGFloat = 8
     private let cornerRadius: CGFloat = 20
@@ -27,6 +29,7 @@ final class MovieQuizViewController: UIViewController {
     private let questionTitle = "Вопрос:"
     private let alertTitle = "Этот раунд окончен!"
     private let alertButtonText = "Сыграть ещё раз"
+    private let questionsAmount = 10
     
     // MARK: - Lifecycle
     
@@ -34,12 +37,16 @@ final class MovieQuizViewController: UIViewController {
         super.viewDidLoad()
         posterImageView.layer.cornerRadius = cornerRadius
         alertPresenter = ResultAlertPresenter(viewController: self)
-        showCurrentQuestion()
+        
+        questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
+        
+        showLoadingIndicator()
+        questionFactory?.loadData()
     }
     
     // MARK: - Actions
     
-    @IBAction private func yesButtonTapped(_ sender: UIButto		n) {
+    @IBAction private func yesButtonTapped(_ sender: UIButton) {
         checkAnswer(true)
     }
     
@@ -49,19 +56,29 @@ final class MovieQuizViewController: UIViewController {
     
     // MARK: - Private Methods
     
-    private func showCurrentQuestion() {
-        guard let question = questionFactory.question(at: currentQuestionIndex) else { return }
-        posterImageView.image = UIImage(named: question.image)
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false
+        activityIndicator.startAnimating()
+    }
+    
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true
+        activityIndicator.stopAnimating()
+    }
+    
+    private func showCurrentQuestion(_ question: QuizQuestion) {
+        currentQuestion = question
+        posterImageView.image = UIImage(data: question.image)
         questionLabel.text = question.text
         questionTitleLabel.text = questionTitle
-        questionIndexLabel.text = "\(currentQuestionIndex + 1)/\(questionFactory.count)"
+        questionIndexLabel.text = "\(currentQuestionIndex + 1)/\(questionsAmount)"
         posterImageView.layer.borderWidth = 0
         posterImageView.layer.borderColor = UIColor.clear.cgColor
     }
     
     private func checkAnswer(_ answer: Bool) {
-        guard let question = questionFactory.question(at: currentQuestionIndex) else { return }
-        let isCorrect = answer == question.correctAnswer
+        guard let currentQuestion else { return }
+        let isCorrect = answer == currentQuestion.correctAnswer
         showAnswerResult(isCorrect)
     }
     
@@ -82,23 +99,24 @@ final class MovieQuizViewController: UIViewController {
     }
     
     private func showNextQuestionOrResults() {
-        if currentQuestionIndex == questionFactory.count - 1 {
+        if currentQuestionIndex == questionsAmount - 1 {
             showResults()
         } else {
             currentQuestionIndex += 1
-            showCurrentQuestion()
+            showLoadingIndicator()
+            questionFactory?.requestNextQuestion()
         }
     }
     
     private func showResults() {
-        statisticService.store(correct: correctAnswers, total: questionFactory.count)
+        statisticService.store(correct: correctAnswers, total: questionsAmount)
         
         let formatter = DateFormatter()
         formatter.dateFormat = dateFormat
         let bestDate = formatter.string(from: statisticService.bestGame.date)
         
         let message = """
-        Ваш результат: \(correctAnswers)/\(questionFactory.count)
+        Ваш результат: \(correctAnswers)/\(questionsAmount)
         Количество сыгранных квизов: \(statisticService.gamesCount)
         Рекорд: \(statisticService.bestGame.correct)/\(statisticService.bestGame.total) (\(bestDate))
         Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
@@ -112,9 +130,48 @@ final class MovieQuizViewController: UIViewController {
             guard let self else { return }
             self.currentQuestionIndex = 0
             self.correctAnswers = 0
-            self.showCurrentQuestion()
+            self.showLoadingIndicator()
+            self.questionFactory?.requestNextQuestion()
         }
         
         alertPresenter?.show(model: model)
+    }
+    
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+        
+        let model = AlertModel(
+            title: "Что-то пошло не так(",
+            message: message,
+            buttonText: "Попробовать ещё раз"
+        ) { [weak self] in
+            guard let self else { return }
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+            self.showLoadingIndicator()
+            self.questionFactory?.loadData()
+        }
+        
+        alertPresenter?.show(model: model)
+    }
+}
+
+// MARK: - QuestionFactoryDelegate
+
+extension MovieQuizViewController: QuestionFactoryDelegate {
+    
+    func didLoadDataFromServer() {
+        hideLoadingIndicator()
+        questionFactory?.requestNextQuestion()
+    }
+    
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription)
+    }
+    
+    func didReceiveNextQuestion(question: QuizQuestion?) {
+        guard let question else { return }
+        hideLoadingIndicator()
+        showCurrentQuestion(question)
     }
 }
