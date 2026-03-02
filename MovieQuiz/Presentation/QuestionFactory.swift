@@ -18,17 +18,17 @@ final class QuestionFactory {
     
     weak var delegate: QuestionFactoryDelegate?
     
-    private let moviesLoader: MoviesLoading
+    private let moviesLoader: MoviesLoaderProtocol
     private var movies: [MostPopularMovie] = []
     
     private enum Constants {
         static let questionsCount = 10
         static let ratingThreshold = 7.0
     }
-    
+    	
     // MARK: - Init
     
-    init(moviesLoader: MoviesLoading, delegate: QuestionFactoryDelegate?) {
+    init(moviesLoader: MoviesLoaderProtocol, delegate: QuestionFactoryDelegate?) {
         self.moviesLoader = moviesLoader
         self.delegate = delegate
     }
