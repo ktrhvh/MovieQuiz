@@ -6,12 +6,6 @@ protocol QuestionFactoryDelegate: AnyObject {
     func didFailToLoadData(with error: Error)
 }
 
-struct QuizQuestion {
-    let image: Data
-    let text: String
-    let correctAnswer: Bool
-}
-
 final class QuestionFactory {
     
     // MARK: - Properties
@@ -22,10 +16,9 @@ final class QuestionFactory {
     private var movies: [MostPopularMovie] = []
     
     private enum Constants {
-        static let questionsCount = 10
-        static let ratingThreshold = 7.0
+        static let ratingRange = 6...8
     }
-    	
+    
     // MARK: - Init
     
     init(moviesLoader: MoviesLoaderProtocol, delegate: QuestionFactoryDelegate?) {
@@ -64,16 +57,16 @@ final class QuestionFactory {
             }
             
             let rating = Float(movie.rating) ?? 0
-            let threshold = Float(Int.random(in: 6...8))
+            let threshold = Float(Int.random(in: Constants.ratingRange))
             let isMoreThan = Bool.random()
             
             let text = isMoreThan
-            ? "Рейтинг этого фильма больше чем \(Int(threshold))?"
-            : "Рейтинг этого фильма меньше чем \(Int(threshold))?"
+                ? "Рейтинг этого фильма больше чем \(Int(threshold))?"
+                : "Рейтинг этого фильма меньше чем \(Int(threshold))?"
             
             let correctAnswer = isMoreThan
-            ? rating > threshold
-            : rating < threshold
+                ? rating > threshold
+                : rating < threshold
             
             let question = QuizQuestion(
                 image: imageData,
